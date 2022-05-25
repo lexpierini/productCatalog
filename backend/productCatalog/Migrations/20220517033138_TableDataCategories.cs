@@ -10,8 +10,8 @@ namespace productCatalog.Migrations
         {
             mb.Sql("INSERT INTO public.\"Categories\"(\"Name\", \"ImageUrl\") " +
                    "Values ('Drinks', 'drinks.jpg'), " +
-                   "('Sandwiches', 'sandwiches.jpg'), " +
-                   "('Desserts', 'desserts.jpg')");            
+                          "('Sandwiches', 'sandwiches.jpg'), " +
+                          "('Desserts', 'desserts.jpg')");            
         }
 
         protected override void Down(MigrationBuilder mb)
