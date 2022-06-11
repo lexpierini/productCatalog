@@ -20,7 +20,7 @@ namespace productCatalog.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Category>> GetAll()
         {
-            return _context.Categories.ToList();
+            return _context.Categories.AsNoTracking().ToList();
         }
 
         [HttpGet("{id:int}", Name = "GetOneCategory")]
@@ -38,7 +38,7 @@ namespace productCatalog.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Category>> GetCategoriesProducts()
         {
-            return _context.Categories.Include(p => p.Products).ToList();
+            return _context.Categories.Include(p => p.Products).AsNoTracking().ToList();
         }
 
         [HttpPost]

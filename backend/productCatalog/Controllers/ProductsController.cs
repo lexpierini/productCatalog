@@ -19,7 +19,7 @@ namespace productCatalog.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Product>> GetAll()
         {
-            var products = _context.Products.ToList();
+            var products = _context.Products.AsNoTracking().ToList();
             if (products is null)
             {
                 return NotFound("Products not found");
