@@ -23,7 +23,7 @@ namespace productCatalog.Controllers
             return _context.Categories.ToList();
         }
 
-        [HttpGet("{id:int}", Name = "GetOne")]
+        [HttpGet("{id:int}", Name = "GetOneCategory")]
         public ActionResult<Category> GetOne(int id)
         {
             var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
@@ -52,7 +52,7 @@ namespace productCatalog.Controllers
             _context.Categories.Add(category);
             _context.SaveChanges();
 
-            return new CreatedAtRouteResult("GetOne", new { id = category.CategoryId }, category);
+            return new CreatedAtRouteResult("GetOneCategory", new { id = category.CategoryId }, category);
         }
 
         [HttpPut("{id:int}")]

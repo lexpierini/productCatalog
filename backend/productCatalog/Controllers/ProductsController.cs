@@ -27,7 +27,7 @@ namespace productCatalog.Controllers
             return products;
         }
 
-        [HttpGet("{id:int}", Name = "GetOne")]
+        [HttpGet("{id:int}", Name = "GetOneProduct")]
         public ActionResult<Product> GetOne(int id)
         {
             var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
@@ -49,7 +49,7 @@ namespace productCatalog.Controllers
             _context.Products.Add(product);
             _context.SaveChanges();
 
-            return new CreatedAtRouteResult("GetOne", new { id = product.ProductId }, product);            
+            return new CreatedAtRouteResult("GetOneProduct", new { id = product.ProductId }, product);            
         }
 
         [HttpPut("{id:int}")]
