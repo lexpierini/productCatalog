@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
 using productCatalog.Models;
@@ -28,7 +27,7 @@ namespace productCatalog.Controllers
             return products;
         }
 
-        [HttpGet("{id:int}", Name ="GetOne")]
+        [HttpGet("{id:int}", Name = "GetOne")]
         public ActionResult<Product> GetOne(int id)
         {
             var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
