@@ -1,4 +1,6 @@
-﻿namespace backendMinimalApi.Models
+﻿using System.Text.Json.Serialization;
+
+namespace backendMinimalApi.Models
 {
     public class Product
     {
@@ -12,6 +14,8 @@
 
         // Relationship Properties
         public int CategoryId { get; set; }
+
+        [JsonIgnore]
         public Category? Category { get; set; }
     }
 }
