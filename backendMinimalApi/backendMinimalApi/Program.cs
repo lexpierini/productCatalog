@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,35 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container. = ConfigureServices (startup)
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ApiProductCatalog", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = @"JWT Authorization header using the Bearer scheme.
+                    Enter 'Bearer'[space].Example: \'Bearer 12345abcdef\'",
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                          {
+                              Reference = new OpenApiReference
+                              {
+                                  Type = ReferenceType.SecurityScheme,
+                                  Id = "Bearer"
+                              }
+                          },
+                         new string[] {}
+                    }
+                });
+});
 
 // PostgreSQL connection settings -------------------------------------------------------- //
 string postgreSqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -20,7 +49,6 @@ string postgreSqlConnection = builder.Configuration.GetConnectionString("Default
 builder.Services.AddEntityFrameworkNpgsql()
     .AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(postgreSqlConnection));
-
 // --------------------------------------------------------------------------------------- //
 
 
@@ -46,7 +74,6 @@ builder.Services.AddAuthentication
                  });
 
 builder.Services.AddAuthorization();
-
 // --------------------------------------------------------------------------------------- //
 
 
@@ -79,7 +106,7 @@ app.MapPost("/login", [AllowAnonymous] (UserModel userModel, ITokenService token
 
 
 // Category
-app.MapGet("/GetAllCategories", async (AppDbContext db) => await db.Categories.ToListAsync()).RequireAuthorization();
+app.MapGet("/GetAllCategories", async (AppDbContext db) => await db.Categories.ToListAsync()).WithTags("Categories").RequireAuthorization();
 
 app.MapGet("/GetOneCategory/{id:int}", async (int id, AppDbContext db) =>
 {
@@ -87,7 +114,7 @@ app.MapGet("/GetOneCategory/{id:int}", async (int id, AppDbContext db) =>
                  is Category category
                  ? Results.Ok(category)
                  : Results.NotFound();
-});
+}).WithTags("Categories").RequireAuthorization();
 
 app.MapPost("/AddOneCategory", async (Category category, AppDbContext db) =>
 {
@@ -95,7 +122,7 @@ app.MapPost("/AddOneCategory", async (Category category, AppDbContext db) =>
     await db.SaveChangesAsync();
 
     return Results.Created($"/GetOneCategory/{category.CategoryId}", category);
-});
+}).WithTags("Categories").RequireAuthorization();
 
 app.MapPut("/UpdateOneCategory/{id:int}", async (int id, Category category, AppDbContext db) =>
 {
@@ -110,7 +137,7 @@ app.MapPut("/UpdateOneCategory/{id:int}", async (int id, Category category, AppD
     await db.SaveChangesAsync();
 
     return Results.Ok(categoryDB);
-});
+}).WithTags("Categories").RequireAuthorization();
 
 app.MapDelete("/DeleteOneCategory/{id:int}", async (int id, AppDbContext db) =>
 {
@@ -122,11 +149,11 @@ app.MapDelete("/DeleteOneCategory/{id:int}", async (int id, AppDbContext db) =>
     await db.SaveChangesAsync();
 
     return Results.NoContent();
-});
+}).WithTags("Categories").RequireAuthorization();
 
 
 // Product
-app.MapGet("/GetAllProducts", async (AppDbContext db) => await db.Products.ToListAsync()).RequireAuthorization();
+app.MapGet("/GetAllProducts", async (AppDbContext db) => await db.Products.ToListAsync()).WithTags("Products").RequireAuthorization();
 
 app.MapGet("/GetOneProduct/{id:int}", async (int id, AppDbContext db) =>
 {
@@ -134,7 +161,7 @@ app.MapGet("/GetOneProduct/{id:int}", async (int id, AppDbContext db) =>
                  is Product product
                  ? Results.Ok(product)
                  : Results.NotFound();
-});
+}).WithTags("Products").RequireAuthorization();
 
 app.MapPost("/AddOneProduct", async (Product product, AppDbContext db) =>
 {
@@ -142,7 +169,7 @@ app.MapPost("/AddOneProduct", async (Product product, AppDbContext db) =>
     await db.SaveChangesAsync();
 
     return Results.Created($"/GetOneProduct/{product.ProductId}", product);
-});
+}).WithTags("Products").RequireAuthorization();
 
 app.MapPut("/UpdateOneProduct/{id:int}", async (int id, Product product, AppDbContext db) =>
 {
@@ -163,7 +190,7 @@ app.MapPut("/UpdateOneProduct/{id:int}", async (int id, Product product, AppDbCo
     await db.SaveChangesAsync();
 
     return Results.Ok(productDB);
-});
+}).WithTags("Products").RequireAuthorization();
 
 app.MapDelete("/DeleteOneProduct/{id:int}", async (int id, AppDbContext db) =>
 {
@@ -175,7 +202,7 @@ app.MapDelete("/DeleteOneProduct/{id:int}", async (int id, AppDbContext db) =>
     await db.SaveChangesAsync();
 
     return Results.NoContent();
-});
+}).WithTags("Products").RequireAuthorization();
 // --------------------------------------------------------------------------------------- //
 
 
