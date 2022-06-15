@@ -1,6 +1,11 @@
 using backendMinimalApi.Context;
 using backendMinimalApi.Models;
+using backendMinimalApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +20,66 @@ string postgreSqlConnection = builder.Configuration.GetConnectionString("Default
 builder.Services.AddEntityFrameworkNpgsql()
     .AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(postgreSqlConnection));
+
 // --------------------------------------------------------------------------------------- //
+
+
+// Security Token ------------------------------------------------------------------------ //
+builder.Services.AddSingleton<ITokenService>(new TokenService());
+
+builder.Services.AddAuthentication
+                 (JwtBearerDefaults.AuthenticationScheme)
+                 .AddJwtBearer(options =>
+                 {
+                     options.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuer = true,
+                         ValidateAudience = true,
+                         ValidateLifetime = true,
+                         ValidateIssuerSigningKey = true,
+
+                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                         ValidAudience = builder.Configuration["Jwt:Audience"],
+                         IssuerSigningKey = new SymmetricSecurityKey
+                         (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                     };
+                 });
+
+builder.Services.AddAuthorization();
+
+// --------------------------------------------------------------------------------------- //
+
 
 var app = builder.Build();
 
 
 // EndPoints ----------------------------------------------------------------------------- //
+// Login
+app.MapPost("/login", [AllowAnonymous] (UserModel userModel, ITokenService tokenService) =>
+{
+    if (userModel == null) return Results.BadRequest("Invalid Login");
+
+    if (userModel.UserName == "admin" && userModel.Password == "admin#123")
+    {
+        var tokenString = tokenService.MakeToken(app.Configuration["Jwt:Key"],
+            app.Configuration["Jwt:Issuer"],
+            app.Configuration["Jwt:Audience"],
+            userModel);
+
+        return Results.Ok(new { token = tokenString });
+    }
+    else
+    {
+        return Results.BadRequest("Invalid Login");
+    }
+}).Produces(StatusCodes.Status400BadRequest)
+  .Produces(StatusCodes.Status200OK)
+  .WithName("Login")
+  .WithTags("Authentication");
+
+
 // Category
-app.MapGet("/GetAllCategories", async (AppDbContext db) => await db.Categories.ToListAsync());
+app.MapGet("/GetAllCategories", async (AppDbContext db) => await db.Categories.ToListAsync()).RequireAuthorization();
 
 app.MapGet("/GetOneCategory/{id:int}", async (int id, AppDbContext db) =>
 {
@@ -67,8 +124,9 @@ app.MapDelete("/DeleteOneCategory/{id:int}", async (int id, AppDbContext db) =>
     return Results.NoContent();
 });
 
+
 // Product
-app.MapGet("/GetAllProducts", async (AppDbContext db) => await db.Products.ToListAsync());
+app.MapGet("/GetAllProducts", async (AppDbContext db) => await db.Products.ToListAsync()).RequireAuthorization();
 
 app.MapGet("/GetOneProduct/{id:int}", async (int id, AppDbContext db) =>
 {
@@ -121,11 +179,16 @@ app.MapDelete("/DeleteOneProduct/{id:int}", async (int id, AppDbContext db) =>
 // --------------------------------------------------------------------------------------- //
 
 
-// Configure the HTTP request pipeline. = Configure (startup)
+// Configure the HTTP request pipeline. == Configure (startup)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Activation of authentication and authorization services
+app.UseAuthentication();
+app.UseAuthorization();
+
 
 app.Run();
