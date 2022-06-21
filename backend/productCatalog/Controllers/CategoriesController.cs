@@ -18,11 +18,11 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> GetAll()
+        public async Task<ActionResult<IEnumerable<Category>>> GetAll()
         {
             try
             {
-                return _context.Categories.AsNoTracking().ToList();
+                return await _context.Categories.AsNoTracking().ToListAsync();
             }
             catch (Exception)
             {
@@ -31,11 +31,11 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetOneCategory")]
-        public ActionResult<Category> GetOne(int id)
+        public async Task<ActionResult<Category>> GetOne(int id)
         {
             try
             {
-                var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
+                var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
 
                 if (category is null)
                 {

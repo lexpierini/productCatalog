@@ -14,4 +14,6 @@ Projet visant à étudier les nouvelles fonctionnalités de .Net 6.
 - Pagination des données;
 - Authentification JWT;
 - CORS;
-- VisualStudio 2022
+- VisualStudio 2022;
+- Extension Methods;
+- #region
