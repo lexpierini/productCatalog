@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
+using productCatalog.Filter;
 using productCatalog.Models;
 
 namespace productCatalog.Controllers
@@ -17,6 +18,7 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
             try
