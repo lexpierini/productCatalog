@@ -2,6 +2,7 @@ using APICatalogo.Extensions;
 using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
 using productCatalog.Filter;
+using productCatalog.Logging;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ApiLoggingFilter>();
+
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
 
 string postgreSqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 

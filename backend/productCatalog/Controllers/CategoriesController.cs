@@ -10,15 +10,19 @@ namespace productCatalog.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger _logger;
 
-        public CategoriesController(AppDbContext context)
+        public CategoriesController(AppDbContext context, ILogger<CategoriesController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetAll()
         {
+            _logger.LogInformation("----- GetAll Categories -----");
+
             try
             {
                 return await _context.Categories.AsNoTracking().ToListAsync();
