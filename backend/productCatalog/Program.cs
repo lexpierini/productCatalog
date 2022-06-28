@@ -1,3 +1,4 @@
+using APICatalogo.Extensions;
 using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
 using productCatalog.Filter;
@@ -14,7 +15,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped <ApiLoggingFilter>();
+builder.Services.AddScoped<ApiLoggingFilter>();
 
 string postgreSqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -30,6 +31,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Error Handling Midleware
+app.ConfigureExceptionHandler();
 
 app.UseHttpsRedirection();
 

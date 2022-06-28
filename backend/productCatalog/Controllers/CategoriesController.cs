@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
 using productCatalog.Models;
@@ -47,7 +46,7 @@ namespace productCatalog.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "There was a problem handling your request");
             }
-            
+
         }
 
         [HttpGet]

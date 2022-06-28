@@ -41,10 +41,12 @@ namespace productCatalog.Controllers
         {
             try
             {
+
                 var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
                 if (product is null)
                 {
-                    return NotFound("Products not found");
+                    throw new Exception("Error when returning the product by id"); //Midleware exceptions
+                    //return NotFound("Products not found");
                 }
                 return product;
             }
