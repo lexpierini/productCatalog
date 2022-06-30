@@ -16,4 +16,6 @@ Projet visant à étudier les nouvelles fonctionnalités de .Net 6.
 - CORS;
 - VisualStudio 2022;
 - Extension Methods;
-- #region
+- #region;
+- Repository Pattern;
+- Unit of Work Pattern;

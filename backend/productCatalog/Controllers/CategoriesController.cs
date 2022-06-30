@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using productCatalog.Context;
 using productCatalog.Models;
+using productCatalog.Repository;
 
 namespace productCatalog.Controllers
 {
@@ -9,23 +8,23 @@ namespace productCatalog.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
 
-        public CategoriesController(AppDbContext context, ILogger<CategoriesController> logger)
+        public CategoriesController(IUnitOfWork context, ILogger<CategoriesController> logger)
         {
-            _context = context;
+            _uof = context;
             _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetAll()
+        public ActionResult<IEnumerable<Category>> GetAll()
         {
             _logger.LogInformation("----- GetAll Categories -----");
 
             try
             {
-                return await _context.Categories.AsNoTracking().ToListAsync();
+                return _uof.CategoryRepository.GetAll().ToList();
             }
             catch (Exception)
             {
@@ -34,11 +33,11 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetOneCategory")]
-        public async Task<ActionResult<Category>> GetOne(int id)
+        public ActionResult<Category> GetOne(int id)
         {
             try
             {
-                var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+                var category = _uof.CategoryRepository.GetById(c => c.CategoryId == id);
 
                 if (category is null)
                 {
@@ -58,7 +57,7 @@ namespace productCatalog.Controllers
         {
             try
             {
-                return _context.Categories.Include(p => p.Products).AsNoTracking().ToList();
+                return _uof.CategoryRepository.GetCategoriesProducts().ToList();
             }
             catch (Exception)
             {
@@ -76,8 +75,8 @@ namespace productCatalog.Controllers
                     return BadRequest("The data entered is invalid");
                 }
 
-                _context.Categories.Add(category);
-                _context.SaveChanges();
+                _uof.CategoryRepository.Add(category);
+                _uof.Commit();
 
                 return new CreatedAtRouteResult("GetOneCategory", new { id = category.CategoryId }, category);
             }
@@ -97,8 +96,8 @@ namespace productCatalog.Controllers
                     return BadRequest("The id informed does not match the id of the category informed");
                 }
 
-                _context.Entry(category).State = EntityState.Modified;
-                _context.SaveChanges();
+                _uof.CategoryRepository.Update(category);
+                _uof.Commit();
 
                 return Ok(category);
             }
@@ -113,15 +112,15 @@ namespace productCatalog.Controllers
         {
             try
             {
-                var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
+                var category = _uof.CategoryRepository.GetById(c => c.CategoryId == id);
 
                 if (category is null)
                 {
                     return NotFound("Category not found");
                 }
 
-                _context.Categories.Remove(category);
-                _context.SaveChanges();
+                _uof.CategoryRepository.Delete(category);
+                _uof.Commit();
 
                 return Ok(category);
             }

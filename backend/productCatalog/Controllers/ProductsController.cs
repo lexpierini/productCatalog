@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using productCatalog.Context;
 using productCatalog.Filter;
 using productCatalog.Models;
+using productCatalog.Repository;
 
 namespace productCatalog.Controllers
 {
@@ -10,20 +9,20 @@ namespace productCatalog.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _uof;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(IUnitOfWork context)
         {
-            _context = context;
+            _uof = context;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+        public ActionResult<IEnumerable<Product>> GetAll()
         {
             try
             {
-                var products = await _context.Products.AsNoTracking().ToListAsync();
+                var products = _uof.ProductRepository.GetAll().ToList();
                 if (products is null)
                 {
                     return NotFound("Products not found");
@@ -37,12 +36,12 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetOneProduct")]
-        public async Task<ActionResult<Product>> GetOne(int id)
+        public ActionResult<Product> GetOne(int id)
         {
             try
             {
 
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
+                var product = _uof.ProductRepository.GetById(p => p.ProductId == id);
                 if (product is null)
                 {
                     throw new Exception("Error when returning the product by id"); //Midleware exceptions
@@ -56,6 +55,12 @@ namespace productCatalog.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult<IEnumerable<Product>> GetProductByPrice()
+        {
+            return _uof.ProductRepository.GetProductByPrice().ToList();
+        }
+
         [HttpPost]
         public ActionResult AddOne(Product product)
         {
@@ -66,8 +71,8 @@ namespace productCatalog.Controllers
                     return BadRequest("The data entered is invalid");
                 }
 
-                _context.Products.Add(product);
-                _context.SaveChanges();
+                _uof.ProductRepository.Add(product);
+                _uof.Commit();
 
                 return new CreatedAtRouteResult("GetOneProduct", new { id = product.ProductId }, product);
             }
@@ -87,8 +92,8 @@ namespace productCatalog.Controllers
                     return BadRequest("The id informed does not match the id of the product informed");
                 }
 
-                _context.Entry(product).State = EntityState.Modified;
-                _context.SaveChanges();
+                _uof.ProductRepository.Update(product);
+                _uof.Commit();
 
                 return Ok(product);
             }
@@ -103,15 +108,15 @@ namespace productCatalog.Controllers
         {
             try
             {
-                var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+                var product = _uof.ProductRepository.GetById(p => p.ProductId == id);
 
                 if (product is null)
                 {
                     return NotFound("Product not found");
                 }
 
-                _context.Products.Remove(product);
-                _context.SaveChanges();
+                _uof.ProductRepository.Delete(product);
+                _uof.Commit();
 
                 return Ok(product);
             }

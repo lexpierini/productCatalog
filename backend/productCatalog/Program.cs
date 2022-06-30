@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
 using productCatalog.Filter;
 using productCatalog.Logging;
+using productCatalog.Repository;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,8 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
 {
     LogLevel = LogLevel.Information
 }));
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 string postgreSqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
