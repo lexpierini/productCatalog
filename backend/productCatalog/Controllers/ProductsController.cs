@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using productCatalog.DTOs;
 using productCatalog.Filter;
 using productCatalog.Models;
 using productCatalog.Repository;
@@ -10,15 +12,17 @@ namespace productCatalog.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork _uof;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IUnitOfWork context)
+        public ProductsController(IUnitOfWork context, IMapper mapper)
         {
             _uof = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<Product>> GetAll()
+        public ActionResult<IEnumerable<ProductDTO>> GetAll()
         {
             try
             {
@@ -27,7 +31,8 @@ namespace productCatalog.Controllers
                 {
                     return NotFound("Products not found");
                 }
-                return products;
+                var productsDto = _mapper.Map<List<ProductDTO>>(products);
+                return productsDto;
             }
             catch (Exception)
             {
@@ -36,7 +41,7 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetOneProduct")]
-        public ActionResult<Product> GetOne(int id)
+        public ActionResult<ProductDTO> GetOne(int id)
         {
             try
             {
@@ -47,7 +52,8 @@ namespace productCatalog.Controllers
                     throw new Exception("Error when returning the product by id"); //Midleware exceptions
                     //return NotFound("Products not found");
                 }
-                return product;
+                var productDto = _mapper.Map<ProductDTO>(product);
+                return productDto;
             }
             catch (Exception)
             {
@@ -56,16 +62,20 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetProductByPrice()
+        public ActionResult<IEnumerable<ProductDTO>> GetProductByPrice()
         {
-            return _uof.ProductRepository.GetProductByPrice().ToList();
+            var products =  _uof.ProductRepository.GetProductByPrice().ToList();
+            var productsDto = _mapper.Map<List<ProductDTO>>(products);
+            return Ok(productsDto);
         }
 
         [HttpPost]
-        public ActionResult AddOne(Product product)
+        public ActionResult AddOne(ProductDTO productDto)
         {
             try
             {
+                var product = _mapper.Map<Product>(productDto);
+
                 if (product is null)
                 {
                     return BadRequest("The data entered is invalid");
@@ -74,7 +84,9 @@ namespace productCatalog.Controllers
                 _uof.ProductRepository.Add(product);
                 _uof.Commit();
 
-                return new CreatedAtRouteResult("GetOneProduct", new { id = product.ProductId }, product);
+                var productDTO = _mapper.Map<ProductDTO>(product);
+
+                return new CreatedAtRouteResult("GetOneProduct", new { id = product.ProductId }, productDTO);
             }
             catch (Exception)
             {
@@ -83,19 +95,21 @@ namespace productCatalog.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Update(int id, Product product)
+        public ActionResult Update(int id, ProductDTO productDto)
         {
             try
             {
-                if (id != product.ProductId)
+                if (id != productDto.ProductId)
                 {
                     return BadRequest("The id informed does not match the id of the product informed");
                 }
 
+                var product = _mapper.Map<Product>(productDto);
+
                 _uof.ProductRepository.Update(product);
                 _uof.Commit();
 
-                return Ok(product);
+                return Ok(productDto);
             }
             catch (Exception)
             {
@@ -104,7 +118,7 @@ namespace productCatalog.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult DeleteOne(int id)
+        public ActionResult<ProductDTO> DeleteOne(int id)
         {
             try
             {
@@ -118,7 +132,9 @@ namespace productCatalog.Controllers
                 _uof.ProductRepository.Delete(product);
                 _uof.Commit();
 
-                return Ok(product);
+                var productDto = _mapper.Map<ProductDTO>(product);
+
+                return Ok(productDto);
             }
             catch (Exception)
             {

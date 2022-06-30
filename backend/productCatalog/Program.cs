@@ -1,6 +1,8 @@
 using APICatalogo.Extensions;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
+using productCatalog.DTOs.Mappings;
 using productCatalog.Filter;
 using productCatalog.Logging;
 using productCatalog.Repository;
@@ -23,6 +25,16 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
 {
     LogLevel = LogLevel.Information
 }));
+
+// AutoMapper
+var mappingConfig = new MapperConfiguration(mc =>
+{
+    mc.AddProfile(new MappingProfile());
+});
+
+IMapper mapper = mappingConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
+
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

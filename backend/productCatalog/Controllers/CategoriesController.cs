@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using productCatalog.DTOs;
 using productCatalog.Models;
 using productCatalog.Repository;
 
@@ -10,21 +12,25 @@ namespace productCatalog.Controllers
     {
         private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(IUnitOfWork context, ILogger<CategoriesController> logger)
+        public CategoriesController(IUnitOfWork context, ILogger<CategoriesController> logger, IMapper mapper)
         {
             _uof = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> GetAll()
+        public ActionResult<IEnumerable<CategoryDTO>> GetAll()
         {
             _logger.LogInformation("----- GetAll Categories -----");
 
             try
-            {
-                return _uof.CategoryRepository.GetAll().ToList();
+            {                
+                var categories = _uof.CategoryRepository.GetAll().ToList();
+                var categoriesDto = _mapper.Map<List<CategoryDTO>>(categories);
+                return categoriesDto;
             }
             catch (Exception)
             {
@@ -33,7 +39,7 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetOneCategory")]
-        public ActionResult<Category> GetOne(int id)
+        public ActionResult<CategoryDTO> GetOne(int id)
         {
             try
             {
@@ -43,7 +49,8 @@ namespace productCatalog.Controllers
                 {
                     return NotFound("Category not found");
                 }
-                return Ok(category);
+                var categoryDto = _mapper.Map<CategoryDTO>(category);
+                return Ok(categoryDto);
             }
             catch (Exception)
             {
@@ -53,11 +60,13 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> GetCategoriesProducts()
+        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesProducts()
         {
             try
             {
-                return _uof.CategoryRepository.GetCategoriesProducts().ToList();
+                var categories = _uof.CategoryRepository.GetCategoriesProducts().ToList();
+                var categoriesDto = _mapper.Map<List<CategoryDTO>>(categories);
+                return Ok(categoriesDto);
             }
             catch (Exception)
             {
@@ -66,10 +75,11 @@ namespace productCatalog.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddOne(Category category)
+        public ActionResult AddOne(CategoryDTO categoryDto)
         {
             try
             {
+                var category = _mapper.Map<Category>(categoryDto);
                 if (category is null)
                 {
                     return BadRequest("The data entered is invalid");
@@ -78,7 +88,9 @@ namespace productCatalog.Controllers
                 _uof.CategoryRepository.Add(category);
                 _uof.Commit();
 
-                return new CreatedAtRouteResult("GetOneCategory", new { id = category.CategoryId }, category);
+                var categoryDTO = _mapper.Map<CategoryDTO>(category);
+
+                return new CreatedAtRouteResult("GetOneCategory", new { id = category.CategoryId }, categoryDTO);
             }
             catch (Exception)
             {
@@ -87,19 +99,21 @@ namespace productCatalog.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Update(int id, Category category)
+        public ActionResult Update(int id, CategoryDTO categoryDto)
         {
             try
             {
-                if (id != category.CategoryId)
+                if (id != categoryDto.CategoryId)
                 {
                     return BadRequest("The id informed does not match the id of the category informed");
                 }
 
+                var category = _mapper.Map<Category>(categoryDto);
+
                 _uof.CategoryRepository.Update(category);
                 _uof.Commit();
 
-                return Ok(category);
+                return Ok(categoryDto);
             }
             catch (Exception)
             {
@@ -108,7 +122,7 @@ namespace productCatalog.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult DeleteOne(int id)
+        public ActionResult<CategoryDTO> DeleteOne(int id)
         {
             try
             {
@@ -122,7 +136,9 @@ namespace productCatalog.Controllers
                 _uof.CategoryRepository.Delete(category);
                 _uof.Commit();
 
-                return Ok(category);
+                var categoryDto = _mapper.Map<CategoryDTO>(category);
+
+                return Ok(categoryDto);
             }
             catch (Exception)
             {
