@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using productCatalog.DTOs;
 using productCatalog.Models;
+using productCatalog.Pagination;
 using productCatalog.Repository;
+using System.Text.Json;
 
 namespace productCatalog.Controllers
 {
@@ -22,13 +24,26 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoryDTO>> GetAll()
+        public ActionResult<IEnumerable<CategoryDTO>> GetAll([FromQuery] CategoriesParameters categoriesParameters)
         {
             _logger.LogInformation("----- GetAll Categories -----");
 
             try
             {                
-                var categories = _uof.CategoryRepository.GetAll().ToList();
+                var categories = _uof.CategoryRepository.GetCategories(categoriesParameters);
+
+                var metadata = new
+                {
+                    categories.TotalCount,
+                    categories.PageSize,
+                    categories.CurrentPage,
+                    categories.TotalPages,
+                    categories.HasNext,
+                    categories.HasPrevious,
+                };
+
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+
                 var categoriesDto = _mapper.Map<List<CategoryDTO>>(categories);
                 return categoriesDto;
             }

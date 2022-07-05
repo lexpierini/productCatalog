@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using productCatalog.DTOs;
 using productCatalog.Filter;
 using productCatalog.Models;
+using productCatalog.Pagination;
 using productCatalog.Repository;
+using System.Text.Json;
 
 namespace productCatalog.Controllers
 {
@@ -22,15 +24,29 @@ namespace productCatalog.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<ProductDTO>> GetAll()
+        public ActionResult<IEnumerable<ProductDTO>> GetAll([FromQuery] ProductsParameters productsParameters)
         {
             try
             {
-                var products = _uof.ProductRepository.GetAll().ToList();
+                var products = _uof.ProductRepository.GetProducts(productsParameters);
+
+                var metadata = new
+                {
+                    products.TotalCount,
+                    products.PageSize,
+                    products.CurrentPage,
+                    products.TotalPages,
+                    products.HasNext,
+                    products.HasPrevious,
+                };
+
                 if (products is null)
                 {
                     return NotFound("Products not found");
                 }
+
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+
                 var productsDto = _mapper.Map<List<ProductDTO>>(products);
                 return productsDto;
             }
