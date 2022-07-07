@@ -9,18 +9,18 @@ namespace productCatalog.Repository
     {
         public CategoryRepository(AppDbContext context) : base(context) { }
 
-        public PagedList<Category> GetCategories(CategoriesParameters categoriesParameters)
+        public async Task<PagedList<Category>> GetCategories(CategoriesParameters categoriesParameters)
         {
-            return PagedList<Category>.ToPagedList(
+            return await PagedList<Category>.ToPagedList(
                 GetAll().OrderBy(c => c.Name),
                 categoriesParameters.PageNumber,
                 categoriesParameters.PageSize
             );
         }
 
-        public IEnumerable<Category> GetCategoriesProducts()
+        public async Task<IEnumerable<Category>> GetCategoriesProducts()
         {
-            return GetAll().Include(c => c.Products);
+            return await GetAll().Include(c => c.Products).ToListAsync();
         }
     }
 }

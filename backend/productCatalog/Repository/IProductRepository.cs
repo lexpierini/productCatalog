@@ -5,7 +5,7 @@ namespace productCatalog.Repository
 {
     public interface IProductRepository : IRepository<Product>
     {
-        PagedList<Product> GetProducts(ProductsParameters productsParameters);
-        IEnumerable<Product> GetProductByPrice();
+        Task<PagedList<Product>> GetProducts(ProductsParameters productsParameters);
+        Task<IEnumerable<Product>> GetProductByPrice();
     }
 }

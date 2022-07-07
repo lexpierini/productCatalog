@@ -1,4 +1,5 @@
-﻿using productCatalog.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using productCatalog.Context;
 using productCatalog.Models;
 using productCatalog.Pagination;
 
@@ -8,18 +9,18 @@ namespace productCatalog.Repository
     {
         public ProductRepository(AppDbContext context) : base(context) { }
 
-        public PagedList<Product> GetProducts(ProductsParameters productsParameters)
+        public async Task<PagedList<Product>> GetProducts(ProductsParameters productsParameters)
         {
-            return PagedList<Product>.ToPagedList(
+            return await PagedList<Product>.ToPagedList(
                 GetAll().OrderBy(p => p.Name),
                 productsParameters.PageNumber,
                 productsParameters.PageSize
             );
         }
 
-        public IEnumerable<Product> GetProductByPrice()
+        public async Task<IEnumerable<Product>> GetProductByPrice()
         {
-            return GetAll().OrderBy(p => p.Price).ToList();
+            return await GetAll().OrderBy(p => p.Price).ToListAsync();
         }
     }
 }

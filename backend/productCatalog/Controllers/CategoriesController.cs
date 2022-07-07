@@ -24,13 +24,13 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoryDTO>> GetAll([FromQuery] CategoriesParameters categoriesParameters)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetAll([FromQuery] CategoriesParameters categoriesParameters)
         {
             _logger.LogInformation("----- GetAll Categories -----");
 
             try
-            {                
-                var categories = _uof.CategoryRepository.GetCategories(categoriesParameters);
+            {
+                var categories = await _uof.CategoryRepository.GetCategories(categoriesParameters);
 
                 var metadata = new
                 {
@@ -54,11 +54,11 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetOneCategory")]
-        public ActionResult<CategoryDTO> GetOne(int id)
+        public async Task<ActionResult<CategoryDTO>> GetOne(int id)
         {
             try
             {
-                var category = _uof.CategoryRepository.GetById(c => c.CategoryId == id);
+                var category = await _uof.CategoryRepository.GetById(c => c.CategoryId == id);
 
                 if (category is null)
                 {
@@ -75,11 +75,11 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesProducts()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesProducts()
         {
             try
             {
-                var categories = _uof.CategoryRepository.GetCategoriesProducts().ToList();
+                var categories = await _uof.CategoryRepository.GetCategoriesProducts();
                 var categoriesDto = _mapper.Map<List<CategoryDTO>>(categories);
                 return Ok(categoriesDto);
             }
@@ -90,7 +90,7 @@ namespace productCatalog.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddOne(CategoryDTO categoryDto)
+        public async Task<ActionResult> AddOne(CategoryDTO categoryDto)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace productCatalog.Controllers
                 }
 
                 _uof.CategoryRepository.Add(category);
-                _uof.Commit();
+                await _uof.Commit();
 
                 var categoryDTO = _mapper.Map<CategoryDTO>(category);
 
@@ -114,7 +114,7 @@ namespace productCatalog.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Update(int id, CategoryDTO categoryDto)
+        public async Task<ActionResult> Update(int id, CategoryDTO categoryDto)
         {
             try
             {
@@ -126,7 +126,7 @@ namespace productCatalog.Controllers
                 var category = _mapper.Map<Category>(categoryDto);
 
                 _uof.CategoryRepository.Update(category);
-                _uof.Commit();
+                await _uof.Commit();
 
                 return Ok(categoryDto);
             }
@@ -137,11 +137,11 @@ namespace productCatalog.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<CategoryDTO> DeleteOne(int id)
+        public async Task<ActionResult<CategoryDTO>> DeleteOne(int id)
         {
             try
             {
-                var category = _uof.CategoryRepository.GetById(c => c.CategoryId == id);
+                var category = await _uof.CategoryRepository.GetById(c => c.CategoryId == id);
 
                 if (category is null)
                 {
@@ -149,7 +149,7 @@ namespace productCatalog.Controllers
                 }
 
                 _uof.CategoryRepository.Delete(category);
-                _uof.Commit();
+                await _uof.Commit();
 
                 var categoryDto = _mapper.Map<CategoryDTO>(category);
 
