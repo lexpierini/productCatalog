@@ -1,5 +1,6 @@
 using APICatalogo.Extensions;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using productCatalog.Context;
 using productCatalog.DTOs.Mappings;
@@ -38,11 +39,18 @@ builder.Services.AddSingleton(mapper);
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+// Database Connection Setup
 string postgreSqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddEntityFrameworkNpgsql()
     .AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(postgreSqlConnection));
+
+// Setup of security standards (Identity)
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
 
 var app = builder.Build();
 
@@ -58,6 +66,9 @@ app.ConfigureExceptionHandler();
 
 app.UseHttpsRedirection();
 
+// Setup of security standards (Authentication Midleware)
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
