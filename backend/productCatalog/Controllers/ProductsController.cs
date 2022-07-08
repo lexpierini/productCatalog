@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using productCatalog.DTOs;
 using productCatalog.Filter;
@@ -11,6 +13,7 @@ namespace productCatalog.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork _uof;
@@ -80,7 +83,7 @@ namespace productCatalog.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductByPrice()
         {
-            var products =  await _uof.ProductRepository.GetProductByPrice();
+            var products = await _uof.ProductRepository.GetProductByPrice();
             var productsDto = _mapper.Map<List<ProductDTO>>(products);
             return Ok(productsDto);
         }
