@@ -56,6 +56,19 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Enabling CORS via Attribute
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("MyPolicy",
+//        builder => builder
+//            .WithOrigins("https://www.apirequest.io/") // Used for specific origins
+//            .WithMethods("GET") // Used for specific methods
+//    );
+//});
+
+// Enabling CORS via Midleware
+builder.Services.AddCors();
+
 
 builder.Services.AddScoped<ApiLoggingFilter>();
 
@@ -123,6 +136,16 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
 
+// Enabling CORS via Midleware - Restrictive
+//app.UseCors(option => option
+//    .WithOrigins("https://www.apirequest.io/") // Used for specific origins
+//    .WithMethods("GET") // Used for specific methods
+//);
+
+// Enabling CORS via Midleware - non-restrictive
+app.UseCors(options => options.AllowAnyOrigin());
+
+
+app.MapControllers();
 app.Run();

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using productCatalog.DTOs;
 using productCatalog.Filter;
@@ -14,6 +15,7 @@ namespace productCatalog.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[EnableCors("MyPolicy")] // Enabling CORS via Attribute for all endpoints
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork _uof;
@@ -27,6 +29,7 @@ namespace productCatalog.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
+        //[EnableCors("MyPolicy")] // Enabling CORS via Attribute for specific endpoints
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAll([FromQuery] ProductsParameters productsParameters)
         {
             try
