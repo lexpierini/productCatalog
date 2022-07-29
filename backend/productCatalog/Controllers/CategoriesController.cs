@@ -56,6 +56,11 @@ namespace productCatalog.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a category by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Objects Category</returns>
         [HttpGet("{id:int}", Name = "GetOneCategory")]
         public async Task<ActionResult<CategoryDTO>> GetOne(int id)
         {
@@ -92,6 +97,20 @@ namespace productCatalog.Controllers
             }
         }
 
+        /// <summary>
+        /// Includes a new category
+        /// </summary>
+        /// <remarks>
+        /// Example request:
+        ///     POST api/Categories/AddOne
+        ///     {
+        ///         "categorieId": 1,
+        ///         "name": "categirie1",
+        ///         "imageUrl": "http://test.net/1.jpg"
+        ///     }
+        /// </remarks>
+        /// <param name="categoryDto">Object Category</param>
+        /// <returns>The included object category</returns>
         [HttpPost]
         public async Task<ActionResult> AddOne(CategoryDTO categoryDto)
         {

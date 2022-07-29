@@ -10,6 +10,7 @@ using productCatalog.DTOs.Mappings;
 using productCatalog.Filter;
 using productCatalog.Logging;
 using productCatalog.Repository;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -25,7 +26,27 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    //options.SwaggerDoc("v1", new OpenApiInfo { Title = "ProductCatalog.API", Version = "v1" });
+    // API details
+    options.SwaggerDoc("v1", new OpenApiInfo { 
+        Version = "v1",
+        Title = "ProductCatalog.API",
+        Description = "Product and Category Catalog",
+        TermsOfService = new Uri("https://github.com/lexpierini"),
+        Contact = new OpenApiContact { 
+            Name = "Alex Pierini",
+            Email = "alex_pierini@hotmail.com",
+            Url = new Uri("https://github.com/lexpierini"),
+        },
+        License = new OpenApiLicense { 
+            Name = "",
+            Url = new Uri("https://github.com/lexpierini")
+        },
+    });
+
+    // XML Comments
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
 
     // Enable token authorization using Swagger (JWT)
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -118,6 +139,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
 
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
