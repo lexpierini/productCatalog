@@ -8,8 +8,9 @@ using System.Text;
 
 namespace productCatalog.Controllers
 {
-    [Route("api/[controller]/[action]")]
     [ApiController]
+    [Route("api/[controller]/[action]")]
+    [Produces("application/json")]
     public class AuthorizationController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;

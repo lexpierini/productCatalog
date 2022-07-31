@@ -12,8 +12,10 @@ using System.Text.Json;
 
 namespace productCatalog.Controllers
 {
-    [Route("api/[controller]/[action]")]
     [ApiController]
+    [Route("api/[controller]/[action]")]
+    [Produces("application/json")]
+    //[ApiConventionType(typeof(DefaultApiConventions))]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     //[EnableCors("MyPolicy")] // Enabling CORS via Attribute for all endpoints
     public class ProductsController : ControllerBase
@@ -63,6 +65,8 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetOneProduct")]
+        [ProducesResponseType(typeof(ProductDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ProductDTO>> GetOne(int id)
         {
             try
@@ -84,6 +88,8 @@ namespace productCatalog.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(ProductDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductByPrice()
         {
             var products = await _uof.ProductRepository.GetProductByPrice();
@@ -92,6 +98,8 @@ namespace productCatalog.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(ProductDTO), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> AddOne(ProductDTO productDto)
         {
             try
@@ -117,6 +125,8 @@ namespace productCatalog.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [ProducesResponseType(typeof(ProductDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Update(int id, ProductDTO productDto)
         {
             try
@@ -140,6 +150,8 @@ namespace productCatalog.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(typeof(ProductDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ProductDTO>> DeleteOne(int id)
         {
             try
