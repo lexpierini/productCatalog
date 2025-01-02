@@ -1,4 +1,4 @@
-# CATALOGUE DES PRODUITS (en cours)
+# CATALOGUE DES PRODUITS
 
 Projet visant à étudier les nouvelles fonctionnalités de .Net 6.
 
